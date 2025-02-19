@@ -1,0 +1,35 @@
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    restart: always
+    ports:
+    - "3000:8080"
+    volumes:
+    - "./services/openwebui:/app/backend/data"
+    environment:
+    - "OLLAMA_BASE_URLS=http://ollama:11434"
+    depends_on:
+      - ollama
+  ollama:
+    image: ollama/ollama
+    restart: always
+    ports:
+    - "11434:11434"
+    volumes:
+    - "./services/ollama:/root/.ollama"
+    environment:
+    - "OLLAMA_HOST=0.0.0.0"
+    post_start:
+      - command: ollama pull llama3.1:8b
+        user: root
+      - command: ollama pull deepseek-r1:14b
+        user: root
+    deploy:
+      resources:
+        limits:
+          memory: 25gb
+        reservations:
+          memory: 10gb
+          # devices:
+          # - capabilities: ["gpu"]
+          #   driver: Apple
